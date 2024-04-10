@@ -1,0 +1,15 @@
+{
+    "name": "sebastianramirez/app",
+    "autoload": {
+        "psr-4": {
+            "Sebastianramirez\\App\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Sebastian Ramirez",
+            "email": "sebastian.rmz.manuel@outlook.com"
+        }
+    ],
+    "require": {}
+}
