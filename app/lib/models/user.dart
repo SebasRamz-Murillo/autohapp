@@ -1,8 +1,17 @@
 class User {
   String email;
   String password;
+  String? token;
 
-  User({required this.email, required this.password});
+  User({required this.email, required this.password, this.token});
+
+  //clear user
+  void clear() {
+    email = "";
+    password = "";
+    token = "";
+  }
+
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       email: json['email'],

@@ -16,19 +16,7 @@ class _HomeState extends State<Home> {
   UserController _userController = UserController();
   String _codigo = "";
   void validar() {
-    if (_controllerCode.text == "1234") {
-      _codigoValido = true;
-      return;
-    }
-    SnackBar snackBar = const SnackBar(
-      backgroundColor: Colors.red,
-      content: Text("Código incorrecto"),
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
-
-  void _obtenerCodigo() {
-    _codigo = _userController.generarCodigo();
+    _codigo = _userController.validarCodigo(int.parse(_controllerCode.text)).toString();
 
     if (_codigo == "") {
       SnackBar snackBar = const SnackBar(
@@ -36,7 +24,9 @@ class _HomeState extends State<Home> {
         content: Text("Error al obtener el código"),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return;
     }
+    _codigoValido = true;
   }
 
   @override
@@ -71,21 +61,11 @@ class _HomeState extends State<Home> {
   }
 
   Widget _GeneraCodigo() {
-    _obtenerCodigo();
     return Column(
       children: [
         Text(
           "Tu código de acceso es: $_codigo",
           style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        const SizedBox(height: 30),
-        TextButton(
-          onPressed: () {
-            setState(() {
-              _codigoValido = false;
-            });
-          },
-          child: const Text("Generar nuevo código"),
         ),
       ],
     );

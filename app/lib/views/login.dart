@@ -1,5 +1,7 @@
+import 'package:app/controllers/user.dart';
 import 'package:app/views/home.dart';
 import 'package:flutter/material.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class Login extends StatefulWidget {
   const Login({
@@ -17,15 +19,75 @@ class _LoginState extends State<Login> {
   final TextEditingController _controllerUsername = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
 
+  UserController userController = UserController();
+
   bool _obscurePassword = true;
+  bool _vpn = false;
 
   void _clear() {
     _controllerUsername.clear();
     _controllerPassword.clear();
   }
 
+  void _checkVPN() async {
+/*     _vpn = true;
+    setState(() {});
+ */
+    List<ConnectivityResult> connectivityResult = await (Connectivity().checkConnectivity());
+    print(connectivityResult);
+    if (connectivityResult == ConnectivityResult.none) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("No tienes conexión a internet"),
+        ),
+      );
+    }
+
+    if (connectivityResult.contains(ConnectivityResult.vpn)) {
+      _vpn = true;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Estas conectado a la red"),
+        ),
+      );
+      setState(() {});
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("No estas conectado a la red"),
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _checkVPN();
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (!_vpn) {
+      return Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("Tienes que conectarte a la red"),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  _checkVPN();
+                },
+                child: const Text("Reintentar"),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       body: Form(
@@ -110,15 +172,25 @@ class _LoginState extends State<Login> {
                     ),
                     onPressed: () {
                       if (_formKey.currentState?.validate() ?? false) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return Home();
-                            },
-                          ),
-                        ).then((value) {
-                          _clear();
+                        userController.login(_controllerUsername.text, _controllerPassword.text).then((value) {
+                          if (!value) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Usuario o contraseña incorrectos"),
+                              ),
+                            );
+                            return;
+                          }
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return Home();
+                              },
+                            ),
+                          ).then((value) {
+                            _clear();
+                          });
                         });
                       }
                     },
